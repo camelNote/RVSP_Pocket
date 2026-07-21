@@ -32,10 +32,14 @@ void drawRVSPWord(const String &word, uint16_t pivotX, uint16_t y, TFT_eSPI *tft
   tft->print(after);
 }
 
-bool fetchWords(char wordBuffer[WORDS_PER_CHUNK][MAX_WORD_LEN], FsFile *bookFile){
+int32_t fetchWords(char wordBuffer[WORDS_PER_CHUNK][MAX_WORD_LEN], FsFile *bookFile, uint32_t startpos, uint32_t *endPos){
   if(bookFile){
-    uint8_t buf[128];
-    uint8_t n = bookFile->readBytesUntil('.', buf, sizeof(buf) - 1);
+    if(!bookFile->seekSet(startpos)){
+      return false; // seek failed (e.g. startpos past EOF)
+    }
+
+    uint8_t buf[WORDS_PER_CHUNK*MAX_WORD_LEN];
+    int32_t n = bookFile->read(buf, sizeof(buf) - 1);//Read 127 characters
     buf[n] = '\0'; //Null character to terminate the string
 
     //Cast type to char* because char* != uint8_t*
@@ -49,9 +53,12 @@ bool fetchWords(char wordBuffer[WORDS_PER_CHUNK][MAX_WORD_LEN], FsFile *bookFile
       token = strtok(nullptr, " ");
     }
 
-    return true;
+    if(endPos){
+      *endPos = (uint32_t)bookFile->position();
+    }
 
+    return n;
   } else{
-    return false;
+    return -1;
   }
 }

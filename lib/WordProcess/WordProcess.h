@@ -12,4 +12,4 @@
 
 uint8_t getORP(uint16_t length);
 void drawRVSPWord(const String &word, uint16_t pivotX, uint16_t y, TFT_eSPI *tft);
-bool fetchWords(char wordBuffer[WORDS_PER_CHUNK][MAX_WORD_LEN], FsFile *bookFile);
+int32_t fetchWords(char wordBuffer[WORDS_PER_CHUNK][MAX_WORD_LEN], FsFile *bookFile, uint32_t startpos, uint32_t *endPos);

@@ -20,10 +20,10 @@
 #define SD_CS PA8
 
 SPIClass mySPI(PB15, PB14, PB13); //MOSI, MISO, CLK, SSEL
-SdSpiConfig sdSdioConfig(SD_CS, DEDICATED_SPI, SD_SCK_MHZ(4), &mySPI);
+SdSpiConfig sdSdioConfig(SD_CS, DEDICATED_SPI, SD_SCK_MHZ(40), &mySPI);
 
 /* Global variables */
-volatile bool btnPressed = false;
+volatile bool btnPressed = true;
 
 SdFat sd;
 File bookFile;
@@ -31,6 +31,8 @@ File bookFile;
 TFT_eSPI tft = TFT_eSPI();
 
 char wordBuffer[WORDS_PER_CHUNK][MAX_WORD_LEN];
+uint32_t endPos = 0;
+int32_t readCount;
 
 //ISR
 void buttonISR(){
@@ -52,7 +54,7 @@ void setup() {
 
   if(sdOK){
     bookFile = sd.open("rvsp/book01.txt", FILE_READ);
-    fetchWords(wordBuffer, &bookFile);
+    readCount = fetchWords(wordBuffer, &bookFile, 0, &endPos); //startPos = endPos = 0, for init
   }
 
   //Interrupts
@@ -68,19 +70,19 @@ void setup() {
   
 
   drawRVSPWord("Start", HALF_WIDTH, HALF_HEIGHT, &tft);  
-
-  // tft.setFreeFont(&FreeSans12pt7b);
-  // tft.setTextDatum(TL_DATUM);             // optional: set text alignment/origin
-  // tft.drawString("Congratulations", 0, 5, GFXFF);
 }
 
 void loop() {
   if(btnPressed){
-    for(uint8_t i = 0; i < WORDS_PER_CHUNK; i++){
-      drawRVSPWord(wordBuffer[i], HALF_WIDTH, HALF_HEIGHT, &tft);
-      delay(200);//change speed. Maybe use timer instead of halting CPU?
-    }
+    while(readCount > 0){
+      for(uint8_t i = 0; i < WORDS_PER_CHUNK; i++){
+        drawRVSPWord(wordBuffer[i], HALF_WIDTH, HALF_HEIGHT, &tft);
+        //delay(200);//change speed. Maybe use timer instead of halting CPU?
+      }
 
+      readCount = fetchWords(wordBuffer, &bookFile, endPos, &endPos);
+    }
+    
     btnPressed = false;
     drawRVSPWord("Start", HALF_WIDTH, HALF_HEIGHT, &tft);
   }
