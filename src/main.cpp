@@ -1,10 +1,8 @@
 #include <Arduino.h>
 #include <TFT_eSPI.h>
-#include <cstring>
-#include <SdFat.h>
-#include <sdios.h>
 
 #include <NotoSansBold15.h>
+#include "WordProcess.h"
 
 /* Const variable definitions */
 //Fonts
@@ -32,43 +30,11 @@ File bookFile;
 
 TFT_eSPI tft = TFT_eSPI();
 
-static char wordBuffer[WORDS_PER_CHUNK][MAX_WORD_LEN];
+char wordBuffer[WORDS_PER_CHUNK][MAX_WORD_LEN];
 
 //ISR
 void buttonISR(){
   btnPressed = true;
-}
-
-uint8_t getORP(uint16_t length){
-  if(length <= 3) return 0;
-  else if(length <= 5) return 1;
-  else if (length <= 9) return 2;
-  else return 3;
-}
-
-void drawRVSPWord(const String &word, uint16_t pivotX, uint16_t y){
-  uint8_t orp = getORP(word.length());
-  String before  = word.substring(0, orp);
-  String orpChar = word.substring(orp, orp + 1);
-  String after   = word.substring(orp + 1);
-
-  int wBefore = tft.textWidth(before);
-  int wOrp    = tft.textWidth(orpChar);
-
-  // Position so the ORP glyph is centered on a fixed screen x
-  int xStart = pivotX - wBefore - wOrp / 2;
-
-  tft.fillRect(0, y, tft.width(), tft.fontHeight(), TFT_BLACK); // clear previous word
-
-  tft.setTextColor(TFT_WHITE, TFT_BLACK);
-  tft.setCursor(xStart, y);
-  tft.print(before);
-
-  tft.setTextColor(TFT_RED, TFT_BLACK);
-  tft.print(orpChar);
-
-  tft.setTextColor(TFT_WHITE, TFT_BLACK);
-  tft.print(after);
 }
 
 void setup() {
@@ -81,35 +47,12 @@ void setup() {
   digitalWrite(PA2, LOW);//TFT BL LOW
 
   bool sdOK = sd.begin(sdSdioConfig);   // no "bool" — assigns the global
-  uint8_t errCode = sd.sdErrorCode();                   // no "uint8_t"
-  uint8_t errData = sd.sdErrorData();
+  //uint8_t errCode = sd.sdErrorCode();                   // no "uint8_t"
+  //uint8_t errData = sd.sdErrorData();
 
-  if (!sdOK) {
-    Serial.print("SD init failed. errorCode=0x");
-    Serial.print(errCode, HEX);
-    Serial.print(" errorData=0x");
-    Serial.println(errData, HEX);
-  } else {
-    Serial.println("SD init OK");
-  }
-
-  bookFile = sd.open("rvsp/book01.txt", FILE_READ);
-
-  if(bookFile){
-    uint8_t buf[128];
-    uint8_t n = bookFile.readBytesUntil('.', buf, sizeof(buf) - 1);
-    buf[n] = '\0'; //Null character to terminate the string
-
-    //Cast type to char* because char* != uint8_t*
-    char* token = strtok((char*)buf, " ");
-    uint8_t wordCount = 0;
-
-    while(token != nullptr && wordCount < WORDS_PER_CHUNK){
-      strncpy(wordBuffer[wordCount], token, MAX_WORD_LEN - 1);
-      wordBuffer[wordCount][MAX_WORD_LEN - 1] = '\0';
-      wordCount++;
-      token = strtok(nullptr, " ");
-    }
+  if(sdOK){
+    bookFile = sd.open("rvsp/book01.txt", FILE_READ);
+    fetchWords(wordBuffer, &bookFile);
   }
 
   //Interrupts
@@ -124,7 +67,7 @@ void setup() {
   tft.setTextDatum(MC_DATUM);
   
 
-  drawRVSPWord("Start", HALF_WIDTH, HALF_HEIGHT);  
+  drawRVSPWord("Start", HALF_WIDTH, HALF_HEIGHT, &tft);  
 
   // tft.setFreeFont(&FreeSans12pt7b);
   // tft.setTextDatum(TL_DATUM);             // optional: set text alignment/origin
@@ -134,11 +77,11 @@ void setup() {
 void loop() {
   if(btnPressed){
     for(uint8_t i = 0; i < WORDS_PER_CHUNK; i++){
-      drawRVSPWord(wordBuffer[i], HALF_WIDTH, HALF_HEIGHT);
-      delay(200);
+      drawRVSPWord(wordBuffer[i], HALF_WIDTH, HALF_HEIGHT, &tft);
+      delay(200);//change speed. Maybe use timer instead of halting CPU?
     }
 
     btnPressed = false;
-    drawRVSPWord("Start", HALF_WIDTH, HALF_HEIGHT);
+    drawRVSPWord("Start", HALF_WIDTH, HALF_HEIGHT, &tft);
   }
 }
