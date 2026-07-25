@@ -23,7 +23,7 @@ SPIClass mySPI(PB15, PB14, PB13); //MOSI, MISO, CLK, SSEL
 SdSpiConfig sdSdioConfig(SD_CS, DEDICATED_SPI, SD_SCK_MHZ(40), &mySPI);
 
 /* Global variables */
-volatile bool btnPressed = true;
+volatile bool btnPressed = false;
 
 SdFat sd;
 File bookFile;
@@ -36,7 +36,7 @@ int32_t readCount;
 
 //ISR
 void buttonISR(){
-  btnPressed = true;
+  btnPressed = ~btnPressed; //toggle button state
 }
 
 void setup() {
@@ -77,7 +77,7 @@ void loop() {
     while(readCount > 0){
       for(uint8_t i = 0; i < WORDS_PER_CHUNK; i++){
         drawRVSPWord(wordBuffer[i], HALF_WIDTH, HALF_HEIGHT, &tft);
-        //delay(200);//change speed. Maybe use timer instead of halting CPU?
+        delay(200);//change speed. Maybe use timer instead of halting CPU?
       }
 
       readCount = fetchWords(wordBuffer, &bookFile, endPos, &endPos);
