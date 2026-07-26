@@ -39,7 +39,8 @@ int32_t fetchWords(char wordBuffer[WORDS_PER_CHUNK][MAX_WORD_LEN], FsFile *bookF
     }
 
     uint8_t buf[WORDS_PER_CHUNK*MAX_WORD_LEN];
-    int32_t n = bookFile->read(buf, sizeof(buf) - 1);//Read 127 characters
+    int16_t n = bookFile->read(buf, sizeof(buf) - 1);
+    uint8_t wordCounter = 0;
     buf[n] = '\0'; //Null character to terminate the string
 
     //Cast type to char* because char* != uint8_t*
@@ -47,6 +48,7 @@ int32_t fetchWords(char wordBuffer[WORDS_PER_CHUNK][MAX_WORD_LEN], FsFile *bookF
     uint8_t wordCount = 0;
 
     while(token != nullptr && wordCount < WORDS_PER_CHUNK){
+      wordCounter += strlen(token) + 1; // +1 for the space character
       strncpy(wordBuffer[wordCount], token, MAX_WORD_LEN - 1);
       wordBuffer[wordCount][MAX_WORD_LEN - 1] = '\0';
       wordCount++;
@@ -57,7 +59,7 @@ int32_t fetchWords(char wordBuffer[WORDS_PER_CHUNK][MAX_WORD_LEN], FsFile *bookF
       *endPos = (uint32_t)bookFile->position();
     }
 
-    return n;
+    return wordCounter; // Return the number of words read (plus space)
   } else{
     return -1;
   }

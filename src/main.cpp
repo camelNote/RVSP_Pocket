@@ -33,15 +33,16 @@ TFT_eSPI tft = TFT_eSPI();
 char wordBuffer[WORDS_PER_CHUNK][MAX_WORD_LEN];
 uint32_t endPos = 0;
 int32_t readCount;
+uint8_t stopCount = 0;
 
 //ISR
 void buttonISR(){
-  btnPressed = ~btnPressed; //toggle button state
+  btnPressed = !btnPressed; //toggle button state
 }
 
 void setup() {
   //PinMode declarations
-  pinMode(PC13, INPUT_PULLUP); //Change to INPUT_PULLUP for btn
+  pinMode(PA0, INPUT_PULLUP);//Button
   pinMode(PC15, OUTPUT);
   pinMode(PA2, OUTPUT);
 
@@ -73,17 +74,51 @@ void setup() {
 }
 
 void loop() {
-  if(btnPressed){
-    while(readCount > 0){
-      for(uint8_t i = 0; i < WORDS_PER_CHUNK; i++){
-        drawRVSPWord(wordBuffer[i], HALF_WIDTH, HALF_HEIGHT, &tft);
-        delay(200);//change speed. Maybe use timer instead of halting CPU?
-      }
+  while(readCount > 0){
+    uint8_t counter = 0;
 
-      readCount = fetchWords(wordBuffer, &bookFile, endPos, &endPos);
-    }
-    
-    btnPressed = false;
-    drawRVSPWord("Start", HALF_WIDTH, HALF_HEIGHT, &tft);
-  }
+    while(counter < WORDS_PER_CHUNK){
+      if(btnPressed){
+        drawRVSPWord(wordBuffer[counter], HALF_WIDTH, HALF_HEIGHT, &tft);
+        counter++;
+        //delay(1500);//change speed. Maybe use timer instead of halting CPU?
+      }else{
+        continue;
+      }
+    }//while
+
+    readCount = fetchWords(wordBuffer, &bookFile, endPos, &endPos);
+  }//while
+
+
+
+  // while(readCount > 0){
+  //   uint8_t counter = 0;
+
+
+  //   if(btnPressed){
+  //     stopCount = 0;
+  //     for(; counter < WORDS_PER_CHUNK; counter++){
+  //       drawRVSPWord(wordBuffer[counter], HALF_WIDTH, HALF_HEIGHT, &tft);
+  //       if(!btnPressed) continue;
+  //       delay(200);//change speed. Maybe use timer instead of halting CPU?
+  //     }
+
+  //     readCount = fetchWords(wordBuffer, &bookFile, endPos, &endPos);
+  //   }else{
+  //     //Draw the current word on the screen
+  //     if(stopCount <= 0){
+  //       drawRVSPWord(wordBuffer[counter], HALF_WIDTH, HALF_HEIGHT, &tft);
+  //       stopCount += 1;
+  //     }
+  //     continue;
+  //   }
+  // }//while
+  
+  //Read through the entire file is complete. Reset to beginning of file and start over.
+  bookFile.seek(0);
+  endPos = 0;
+  readCount = fetchWords(wordBuffer, &bookFile, 0, &endPos);
+  btnPressed = false;
+  drawRVSPWord("End.", HALF_WIDTH, HALF_HEIGHT, &tft);
 }
