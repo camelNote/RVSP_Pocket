@@ -3,3 +3,8 @@
 .vscode/c_cpp_properties.json
 .vscode/launch.json
 .vscode/ipch
+fp-info-cache
+*-backups
+README.txt
+
+PCB/RVSP_Pocket/.history
