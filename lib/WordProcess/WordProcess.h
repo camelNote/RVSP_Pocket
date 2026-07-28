@@ -7,7 +7,7 @@
 #include <TFT_eSPI.h>
 
 
-#define WORDS_PER_CHUNK 10
+#define WORDS_PER_CHUNK 4
 #define MAX_WORD_LEN    24
 
 uint8_t getORP(uint16_t length);

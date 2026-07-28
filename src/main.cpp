@@ -1,17 +1,13 @@
 #include <Arduino.h>
 #include <TFT_eSPI.h>
 
-#include <NotoSansBold15.h>
+#include <NotoSansJP20.h>
 #include "WordProcess.h"
 
 /* Const variable definitions */
 //Fonts
-#define AA_FONT_SMALL NotoSansBold15
+#define AA_FONT_SMALL NotoSansJP20
 #define GFXFF 1
-
-//String Buffer
-#define WORDS_PER_CHUNK 10
-#define MAX_WORD_LEN    24
 
 //Reversed due to landscape mode
 #define HALF_WIDTH TFT_HEIGHT/2
@@ -53,11 +49,6 @@ void setup() {
   //uint8_t errCode = sd.sdErrorCode();                   // no "uint8_t"
   //uint8_t errData = sd.sdErrorData();
 
-  if(sdOK){
-    bookFile = sd.open("rvsp/book01.txt", FILE_READ);
-    readCount = fetchWords(wordBuffer, &bookFile, 0, &endPos); //startPos = endPos = 0, for init
-  }
-
   //Interrupts
   attachInterrupt(PA0, buttonISR, FALLING);
 
@@ -68,7 +59,17 @@ void setup() {
   tft.loadFont(AA_FONT_SMALL);
   tft.setTextColor(TFT_WHITE, TFT_BLACK);
   tft.setTextDatum(MC_DATUM);
-  
+
+  if(sdOK){
+    bookFile = sd.open("rvsp/book01.txt", FILE_READ);
+    readCount = fetchWords(wordBuffer, &bookFile, 0, &endPos); //startPos = endPos = 0, for init
+  }else{
+    // Handle SD card initialization failure
+    while(true){
+      drawRVSPWord("SD_Failed", HALF_WIDTH, HALF_HEIGHT, &tft);
+      delay(5000);
+    } 
+  }
 
   drawRVSPWord("Start", HALF_WIDTH, HALF_HEIGHT, &tft);  
 }
@@ -81,39 +82,16 @@ void loop() {
       if(btnPressed){
         drawRVSPWord(wordBuffer[counter], HALF_WIDTH, HALF_HEIGHT, &tft);
         counter++;
-        //delay(1500);//change speed. Maybe use timer instead of halting CPU?
+        delay(300);//change speed. Maybe use timer instead of halting CPU?
       }else{
         continue;
       }
     }//while
 
+    //Fetch another batch
     readCount = fetchWords(wordBuffer, &bookFile, endPos, &endPos);
+
   }//while
-
-
-
-  // while(readCount > 0){
-  //   uint8_t counter = 0;
-
-
-  //   if(btnPressed){
-  //     stopCount = 0;
-  //     for(; counter < WORDS_PER_CHUNK; counter++){
-  //       drawRVSPWord(wordBuffer[counter], HALF_WIDTH, HALF_HEIGHT, &tft);
-  //       if(!btnPressed) continue;
-  //       delay(200);//change speed. Maybe use timer instead of halting CPU?
-  //     }
-
-  //     readCount = fetchWords(wordBuffer, &bookFile, endPos, &endPos);
-  //   }else{
-  //     //Draw the current word on the screen
-  //     if(stopCount <= 0){
-  //       drawRVSPWord(wordBuffer[counter], HALF_WIDTH, HALF_HEIGHT, &tft);
-  //       stopCount += 1;
-  //     }
-  //     continue;
-  //   }
-  // }//while
   
   //Read through the entire file is complete. Reset to beginning of file and start over.
   bookFile.seek(0);
@@ -121,4 +99,5 @@ void loop() {
   readCount = fetchWords(wordBuffer, &bookFile, 0, &endPos);
   btnPressed = false;
   drawRVSPWord("End.", HALF_WIDTH, HALF_HEIGHT, &tft);
+  delay(5000);
 }
