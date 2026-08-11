@@ -27,9 +27,12 @@ File bookFile;
 TFT_eSPI tft = TFT_eSPI();
 
 char wordBuffer[WORDS_PER_CHUNK][MAX_WORD_LEN];
-uint32_t endPos = 0;
-int32_t readCount;
-uint8_t stopCount = 0;
+uint64_t endPos = 0;//Track position of cursor
+int32_t readCount; //Number of words read from file
+
+uint16_t wordSpeed = 300; //Default wpm speed;
+uint16_t delayTime = (float)60/wordSpeed * 1000; //ms delay between words
+
 
 //ISR
 void buttonISR(){
@@ -37,6 +40,9 @@ void buttonISR(){
 }
 
 void setup() {
+  uint32_t cpuFreq = HAL_RCC_GetHCLKFreq();
+  cpuFreq /= 1000000; //Convert to MHz
+
   //PinMode declarations
   pinMode(PA0, INPUT_PULLUP);//Button
   pinMode(PC15, OUTPUT);
@@ -81,11 +87,18 @@ void loop() {
     while(counter < WORDS_PER_CHUNK){
       if(btnPressed){
         drawRVSPWord(wordBuffer[counter], HALF_WIDTH, HALF_HEIGHT, &tft);
+        uint8_t wordLength = strlen(wordBuffer[counter]);
+        char lastChar = wordBuffer[counter][wordLength - 1];
+
+        //Add extra delay for punctuation
+        if(lastChar == '.' || lastChar == '?' || lastChar == '!' || lastChar == ',') {
+          delay(delayTime * 2); 
+        }else {
+          delay(delayTime);
+        }
         counter++;
-        delay(300);//change speed. Maybe use timer instead of halting CPU?
-      }else{
-        continue;
-      }
+    }//if
+
     }//while
 
     //Fetch another batch

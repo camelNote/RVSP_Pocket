@@ -1,11 +1,27 @@
 #include "WordProcess.h"
 
+
+/*
+length = 1, ORP = 0
+       = 2, ORP = 1
+       = 3, ORP = 1
+       = 4, ORP = 2
+       = 5, ORP = 2
+       = 6, ORP = 3
+       = 7, ORP = 3
+       = 8, ORP = 3
+       = 9, ORP = 3
+       = 10, ORP = 4
+
+*/
 uint8_t getORP(uint16_t length){
-  if(length <= 3) return 0;
-  else if(length <= 5) return 1;
-  else if (length <= 9) return 2;
-  else return 3;
+  if(length < 3) return (uint8_t)(length - 1);
+  else if(length >= 3 && length <= 5) return 1;
+  else if(length > 5 && length <= 7) return 3;
+  else return length/2 - 1;
 }
+
+
 
 void drawRVSPWord(const String &word, uint16_t pivotX, uint16_t y, TFT_eSPI *tft){
   uint8_t orp = getORP(word.length());
@@ -32,7 +48,7 @@ void drawRVSPWord(const String &word, uint16_t pivotX, uint16_t y, TFT_eSPI *tft
   tft->print(after);
 }
 
-int32_t fetchWords(char wordBuffer[WORDS_PER_CHUNK][MAX_WORD_LEN], FsFile *bookFile, uint32_t startpos, uint32_t *endPos){
+int32_t fetchWords(char wordBuffer[WORDS_PER_CHUNK][MAX_WORD_LEN], FsFile *bookFile, uint64_t startpos, uint64_t *endPos){
   if(bookFile){
     if(!bookFile->seekSet(startpos)){
       return false; // seek failed (e.g. startpos past EOF)
@@ -75,7 +91,7 @@ int32_t fetchWords(char wordBuffer[WORDS_PER_CHUNK][MAX_WORD_LEN], FsFile *bookF
     }
 
     if(endPos){
-      *endPos += (uint32_t)wordReadLength;
+      *endPos += (uint64_t)wordReadLength;
     }
 
     return wordReadLength;
