@@ -6916,7 +6916,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "27647021-2b2f-47a4-bbed-f55c99a4fdef")
-		(property "Reference" "DOWN"
+		(property "Reference" "DOWN1"
 			(at 40.64 113.03 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6978,7 +6978,7 @@
 		(instances
 			(project "RVSP_Pocket"
 				(path "/68d24f2b-0e73-4817-9bb9-fc791efd9ec9"
-					(reference "DOWN")
+					(reference "DOWN1")
 					(unit 1)
 				)
 			)
@@ -7785,7 +7785,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "4a728789-d728-47f2-a680-504952d50e92")
-		(property "Reference" "UP"
+		(property "Reference" "UP1"
 			(at 40.64 124.46 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -7847,7 +7847,7 @@
 		(instances
 			(project "RVSP_Pocket"
 				(path "/68d24f2b-0e73-4817-9bb9-fc791efd9ec9"
-					(reference "UP")
+					(reference "UP1")
 					(unit 1)
 				)
 			)
@@ -7947,7 +7947,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "5000bbe7-154b-41c5-af20-514610117f5b")
-		(property "Reference" "SELECT"
+		(property "Reference" "SELECT1"
 			(at 40.64 137.16 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -8009,7 +8009,7 @@
 		(instances
 			(project "RVSP_Pocket"
 				(path "/68d24f2b-0e73-4817-9bb9-fc791efd9ec9"
-					(reference "SELECT")
+					(reference "SELECT1")
 					(unit 1)
 				)
 			)
@@ -11215,7 +11215,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "c10af0e1-3450-489b-9aa4-8acc325efc4f")
-		(property "Reference" "RIGHT"
+		(property "Reference" "RIGHT1"
 			(at 40.64 101.6 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -11277,7 +11277,7 @@
 		(instances
 			(project "RVSP_Pocket"
 				(path "/68d24f2b-0e73-4817-9bb9-fc791efd9ec9"
-					(reference "RIGHT")
+					(reference "RIGHT1")
 					(unit 1)
 				)
 			)
