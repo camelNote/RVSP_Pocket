@@ -2,8 +2,8 @@
 
 ## Overview
 
-<img src="images/PCB3D_Front.png"></img>
-<img src="images/PCB3D_Back.png"></img>
+<img src="images/PCB3D_Front.png" width="500"></img>
+<img src="images/PCB3D_Back.png" width="500"></img>
 
 Rapid Serial Visual Presentation is a reading technique of presenting text in a single focal point to reduce eye movement. The aim is maximize reading throughput without compromising understanding.<br>
 
