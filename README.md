@@ -7,7 +7,7 @@
 
 Rapid Serial Visual Presentation is a reading technique of presenting text in a single focal point to reduce eye movement. The aim is maximize reading throughput without compromising understanding.<br>
 
-RVSP Pocket is a STM32F4 "soft" fork of <link src="https://github.com/ionutdecebal/rsvpnano"> RVSP Nano </link>. The aim of this project is to make a more hardware optimized version of the RVSP Nano, cheaper, and more compact. Currently the project is in the protyping stage, but here's the planned features pipeline:
+RVSP Pocket is a STM32F4 "soft" fork of [RVSP Nano](https://github.com/ionutdecebal/rsvpnano). The aim of this project is to make a more hardware optimized version of the RVSP Nano, cheaper, and more compact. Currently the project is in the protyping stage, but here's the planned features pipeline:
 
 * Local web app to decompress popular ebook file format (.epub)
 * USB-C MSC file to transfer files directly to SD card
