@@ -40,16 +40,14 @@ void buttonISR(){
 }
 
 void setup() {
-  uint32_t cpuFreq = HAL_RCC_GetHCLKFreq();
-  cpuFreq /= 1000000; //Convert to MHz
-
   //PinMode declarations
   pinMode(PA0, INPUT_PULLUP);//Button
   pinMode(PC15, OUTPUT);
   pinMode(PA2, OUTPUT);
 
   digitalWrite(PC15, LOW);//Virtual GND
-  digitalWrite(PA2, LOW);//TFT BL LOW
+  digitalWrite(PA2, LOW);//TFT BL LOW 
+  
 
   bool sdOK = sd.begin(sdSdioConfig);   // no "bool" — assigns the global
   //uint8_t errCode = sd.sdErrorCode();                   // no "uint8_t"
@@ -77,7 +75,8 @@ void setup() {
     } 
   }
 
-  drawRVSPWord("Start", HALF_WIDTH, HALF_HEIGHT, &tft);  
+  drawRVSPWord("Start", HALF_WIDTH, HALF_HEIGHT, &tft);
+  
 }
 
 void loop() {
