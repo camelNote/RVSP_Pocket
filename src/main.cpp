@@ -3,6 +3,7 @@
 
 #include <NotoSansJP20.h>
 #include "WordProcess.h"
+#include "Menu.h"
 
 /* Const variable definitions */
 //Fonts
@@ -32,16 +33,18 @@ int32_t readCount; //Number of words read from file
 
 uint16_t wordSpeed = 300; //Default wpm speed;
 uint16_t delayTime = (float)60/wordSpeed * 1000; //ms delay between words
+uint menuState = 0; //0 = Library, 1 = settings, 2 = battery, 3 = fileSys
 
 
 //ISR
 void buttonISR(){
   btnPressed = !btnPressed; //toggle button state
+  menuState = (menuState + 1) % 4; //Cycle through menu states
 }
 
 void setup() {
   //PinMode declarations
-  pinMode(PA0, INPUT_PULLUP);//Button
+  pinMode(PB6, INPUT_PULLUP);//Button
   pinMode(PC15, OUTPUT);
   pinMode(PA2, OUTPUT);
 
@@ -54,15 +57,13 @@ void setup() {
   //uint8_t errData = sd.sdErrorData();
 
   //Interrupts
-  attachInterrupt(PA0, buttonISR, FALLING);
+  attachInterrupt(PB6, buttonISR, FALLING);
 
   tft.init();
-  tft.setRotation(1);
+  tft.setRotation(3);
   tft.fillScreen(TFT_BLACK);
 
-  tft.loadFont(AA_FONT_SMALL);
-  tft.setTextColor(TFT_WHITE, TFT_BLACK);
-  tft.setTextDatum(MC_DATUM);
+  
 
   if(sdOK){
     bookFile = sd.open("rvsp/book01.txt", FILE_READ);
@@ -75,11 +76,18 @@ void setup() {
     } 
   }
 
-  drawRVSPWord("Start", HALF_WIDTH, HALF_HEIGHT, &tft);
   
 }
 
 void loop() {
+  drawMenu(&tft, &menuState);
+
+  tft.loadFont(AA_FONT_SMALL);
+  tft.setTextColor(TFT_WHITE, TFT_BLACK);
+  tft.setTextDatum(MC_DATUM);
+  
+  drawRVSPWord("Start", HALF_WIDTH, HALF_HEIGHT, &tft);
+
   while(readCount > 0){
     uint8_t counter = 0;
 
