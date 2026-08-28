@@ -68,11 +68,24 @@ void drawScreen_1(TFT_eSPI *tft) {
 
 void drawMenu(TFT_eSPI *tft, uint *selectedItem){
     //Setup
-    drawScreen_1(tft);
+    
 
     while (true) {
+        drawScreen_1(tft);
+        uint currentMenuState = *selectedItem;
+
         // rect 1
-        tft->drawRect(5 + (*selectedItem * 70), 10, 60, 57, 0xFFFF);
-        drawAnimations(tft, selectedItem);
+        if(*selectedItem == 0) tft->drawRect(5, 10, 60, 57, 0xFFFF);
+        else if(*selectedItem == 1) tft->drawRect(75, 10, 60, 57, 0xFFFF);
+        else if(*selectedItem == 2) tft->drawRect(135, 10, 60, 57, 0xFFFF);
+        else if(*selectedItem == 3) tft->drawRect(200, 10, 60, 57, 0xFFFF);
+        else tft->drawRect(5, 10, 60, 57, 0xFFFF);
+
+        while(true) {
+            drawAnimations(tft, selectedItem);
+            if(currentMenuState != *selectedItem) {
+                break; // Exit inner loop if menu state has changed
+            }
+        }  
     }
 }

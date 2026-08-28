@@ -63,8 +63,6 @@ void setup() {
   tft.setRotation(3);
   tft.fillScreen(TFT_BLACK);
 
-  
-
   if(sdOK){
     bookFile = sd.open("rvsp/book01.txt", FILE_READ);
     readCount = fetchWords(wordBuffer, &bookFile, 0, &endPos); //startPos = endPos = 0, for init
