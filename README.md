@@ -10,6 +10,9 @@ RVSP Pocket is a STM32F4 "soft" fork of the [RVSP Nano](https://github.com/ionut
 * USB-C MSC file to transfer files directly to SD card
 * 3D printed case
 
+## Visual of Menu
+<img src="images/Menu.png"></img>
+> Built using Lopaka
 
 ## Bill of materials
 
