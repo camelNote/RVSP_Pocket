@@ -5,7 +5,7 @@
 ### <i> How fast can you read? </i><br>
 Rapid Serial Visual Presentation is a reading technique of presenting text in a single focal point to reduce eye movement. The aim is maximize reading throughput without compromising understanding.<br>
 
-RVSP Pocket is a STM32F4 "soft" fork of the [RVSP Nano](https://github.com/ionutdecebal/rsvpnano). RVSP Pocket aims to be a more hardware optimized version of the RVSP Nano, cheaper, and more compact. Currently the project is in the protyping stage, but here's the planned features pipeline:
+RVSP Pocket is a STM32F4 "soft" fork of the [RSVP Nano](https://github.com/ionutdecebal/rsvpnano). RVSP Pocket aims to be a more hardware optimized version of the RVSP Nano, cheaper, and more compact. Currently the project is in the protyping stage, but here's the planned features pipeline:
 
 > Features:
 > * Localized simple Angular webapp to convert .epub files into .txt file that the MCU can decode quickly
@@ -13,8 +13,8 @@ RVSP Pocket is a STM32F4 "soft" fork of the [RVSP Nano](https://github.com/ionut
 > * Can act as a USB Mass Storage Class (MSC) device: Allowing user to access microSD on their laptop! Essentially can act as an USB microSD card reader (which can cost anywhere from $15 to $30!)
 > * 25 MHz external HSE that enables the STM32F4 family of chips to run at maximum rated system clock of 84 Mhz.
 
-### Current V1 of board: (It looks better in person!)
-<img src="images/versionOne.jpg"></img>
+### Current board: (It looks better in person!)
+<img src="images/versionOne.jpg" width="500"></img>
 
 ## Bill of materials
 BOM can be found at /PCB/RSVP_Pocket.csv
