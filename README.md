@@ -13,7 +13,7 @@ RVSP Pocket is a STM32F4 "soft" fork of the [RVSP Nano](https://github.com/ionut
 > * Can act as a USB Mass Storage Class (MSC) device: Allowing user to access microSD on their laptop! Essentially can act as an USB microSD card reader (which can cost anywhere from $15 to $30!)
 > * 25 MHz external HSE that enables the STM32F4 family of chips to run at maximum rated system clock of 84 Mhz.
 
-### Current V1 of board:
+### Current V1 of board: (It looks better in person!)
 <img src="images/versionOne.jpg"></img>
 
 ## Bill of materials
