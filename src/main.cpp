@@ -72,6 +72,7 @@ void upBtnISR(){
   if (currentTime - lastInterruptTime >= debounceDelay) {
     upBtnPressed = !upBtnPressed; // toggle button state
     lastInterruptTime = currentTime;
+    btnStates.upState += 1;
   }
 }
 
@@ -80,6 +81,7 @@ void downBtnISR(){
   if (currentTime - lastInterruptTime >= debounceDelay) {
     downBtnPressed = !downBtnPressed; // toggle button state
     lastInterruptTime = currentTime;
+    btnStates.downState += 1;
   }
 }
 
@@ -110,22 +112,20 @@ void setup() {
   tft.setRotation(3);
   tft.fillScreen(TFT_BLACK);
 
-  if(sdOK){
-    bookFile = sd.open("rvsp/book01.txt", FILE_READ);
-    readCount = fetchWords(wordBuffer, &bookFile, 0, &endPos); //startPos = endPos = 0, for init
-  }else{
+  if(!sdOK){
+    //bookFile = sd.open("rvsp/book01.txt", FILE_READ);
     // Handle SD card initialization failure
     while(true){
       drawRVSPWord("SD_Failed", HALF_WIDTH, HALF_HEIGHT, &tft);
       delay(5000);
     } 
-  }
+  }//if
 
   
 }
 
 void loop() {
-  drawMenu(&tft, &btnStates);
+  drawMenu(&tft, &btnStates, sd, bookFile);
 
   tft.loadFont(AA_FONT_SMALL);
   tft.setTextColor(TFT_WHITE, TFT_BLACK);

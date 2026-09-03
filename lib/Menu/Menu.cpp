@@ -1,4 +1,5 @@
 #include "Menu.h"
+#include "USB_MSC.h"
 
 void updateAnimations(btnSelection *btnStates) {
     //Update animation for active focus icon
@@ -74,7 +75,17 @@ void drawScreen_2(TFT_eSPI *tft) {
     // string 3
     tft->setTextColor(0xFFFF);
     tft->setTextSize(1);
-    tft->drawString("New Library Screen", 14, 54);
+    tft->drawRect(7, 3, 271, 25, 0xFFFF);
+    // _174002
+    tft->drawBitmap(-3, 38, image__174002_bits, 32, 32, 0xFFFF);
+    // string 3
+    tft->setTextColor(0xFFFF);
+    tft->setTextSize(1);
+    tft->drawString("Up/Down Btn", 23, 50);
+    // line 4
+    tft->drawLine(126, 39, 126, 67, 0xFFFF);
+    // string 3 copy 1
+    tft->drawString("Right Btn to Exit", 148, 49);
 }
 
 void mainMenu(TFT_eSPI *tft, btnSelection *btnStates, uint8_t currentMenuState) {
@@ -96,32 +107,51 @@ void mainMenu(TFT_eSPI *tft, btnSelection *btnStates, uint8_t currentMenuState) 
     
 }
 
-void libraryMenu(TFT_eSPI *tft, btnSelection *btnStates, uint8_t currentMenuState) {
-    drawScreen_2(tft);
+bool libraryMenu(TFT_eSPI *tft, btnSelection *btnStates, uint8_t currentMenuState, SdFat &sd, FsFile &bookFile) {
+    btnStates->selectState = 0; //Reset Select state
+    const uint32_t totalFiles = totalFilesInFolder(sd, "rvsp");
+    
+    uint32_t counter = 0;
 
-    while(true) {
-        
-        //Exit
-        if(currentMenuState != btnStates->menuState) {
-            btnStates->selectState = 0;
-            break; // Exit inner loop if menu state has changed
-        }//if
+    while(true){
+        uint32_t currentCounter = counter; // Store the current counter to detect changes
+        drawScreen_2(tft); //Redraw the screen to clear previous file names
+        char fileName[32];
+
+        while(currentCounter == counter){
+            counter = (btnStates->upState > btnStates->downState) ? (btnStates->upState - btnStates->downState) % totalFiles : 0;
+            getFileNameAtIndex(sd, "rvsp", fileName, counter); // Fetch the file name at the current index
+
+            //Draw
+            tft->drawString(String(counter) + ": " + fileName, 23, 12);
+
+            if(btnStates->selectState > 0) {
+                bookFile = sd.open("rvsp/" + String(fileName), FILE_READ);
+                return true; // Exit the library menu and indicate a file has been selected
+            }
+
+            //Break for user exit
+            if(currentMenuState != btnStates->menuState) {
+                btnStates->selectState = 0; //Reset Select state
+                return false; // Exit the library menu
+            }//if
+        }//while
     }//while
+    
     
 }
 
-void drawMenu(TFT_eSPI *tft, btnSelection *btnStates){
+void drawMenu(TFT_eSPI *tft, btnSelection *btnStates, SdFat &sd, FsFile &bookFile) {
+    bool bookSelected = false;
     //Setup
-    while (true) {
+    while (!bookSelected) {
         uint8_t currentMenuState = btnStates->menuState;
 
         if(btnStates->selectState > 0 && currentMenuState == 0){
-            libraryMenu(tft, btnStates, currentMenuState);
+            bookSelected = libraryMenu(tft, btnStates, currentMenuState, sd, bookFile);
         }
         else {
             mainMenu(tft, btnStates, currentMenuState);
         }//else
-
-        
     }//while
 }
