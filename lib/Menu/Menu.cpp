@@ -137,8 +137,6 @@ bool libraryMenu(TFT_eSPI *tft, btnSelection *btnStates, uint8_t currentMenuStat
             }//if
         }//while
     }//while
-    
-    
 }
 
 void drawMenu(TFT_eSPI *tft, btnSelection *btnStates, SdFat &sd, FsFile &bookFile) {
@@ -154,4 +152,6 @@ void drawMenu(TFT_eSPI *tft, btnSelection *btnStates, SdFat &sd, FsFile &bookFil
             mainMenu(tft, btnStates, currentMenuState);
         }//else
     }//while
+
+    tft->fillScreen(0x0);
 }
