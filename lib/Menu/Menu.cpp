@@ -107,8 +107,9 @@ void mainMenu(TFT_eSPI *tft, btnSelection *btnStates, uint8_t currentMenuState) 
     
 }
 
-bool libraryMenu(TFT_eSPI *tft, btnSelection *btnStates, uint8_t currentMenuState, SdFat &sd, FsFile &bookFile) {
+bool libraryMenu(TFT_eSPI *tft, btnSelection *btnStates, uint8_t currentMenuState, SdFat &sd, File32 &bookFile) {
     btnStates->selectState = 0; //Reset Select state
+    delay(500);
     const uint32_t totalFiles = totalFilesInFolder(sd, "rvsp");
     
     uint32_t counter = 0;
@@ -139,14 +140,30 @@ bool libraryMenu(TFT_eSPI *tft, btnSelection *btnStates, uint8_t currentMenuStat
     }//while
 }
 
-void drawMenu(TFT_eSPI *tft, btnSelection *btnStates, SdFat &sd, FsFile &bookFile) {
+void fileSysMenu(TFT_eSPI *tft, btnSelection *btnStates, SdFat &sd, SdSpiConfig &sdSdioConfig) {
+    btnStates->selectState = 0; //Reset Select state
+    tft->fillScreen(0x0);
+    tft->drawString("FileSys Menu", 10, 10);
+    setupUSB(sd, sdSdioConfig);
+
+    while(btnStates->selectState == 0){
+        #if defined(ARDUINO_ARCH_STM32)
+            TinyUSB_Device_Task();   // pumps the USB state machine — needed on this core
+        #endif
+    }
+}
+
+void drawMenu(TFT_eSPI *tft, btnSelection *btnStates, SdFat &sd, File32 &bookFile, SdSpiConfig &sdSdioConfig) {
     bool bookSelected = false;
     //Setup
     while (!bookSelected) {
         uint8_t currentMenuState = btnStates->menuState;
 
-        if(btnStates->selectState > 0 && currentMenuState == 0){
+        if(btnStates->selectState == 1 && currentMenuState == 0){
             bookSelected = libraryMenu(tft, btnStates, currentMenuState, sd, bookFile);
+        }
+        else if(btnStates->selectState == 1 && currentMenuState == 3){
+            fileSysMenu(tft, btnStates, sd, sdSdioConfig);
         }
         else {
             mainMenu(tft, btnStates, currentMenuState);

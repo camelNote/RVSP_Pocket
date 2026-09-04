@@ -48,7 +48,7 @@ void drawRVSPWord(const String &word, uint16_t pivotX, uint16_t y, TFT_eSPI *tft
   tft->print(after);
 }
 
-int32_t fetchWords(char wordBuffer[WORDS_PER_CHUNK][MAX_WORD_LEN], FsFile *bookFile, uint64_t startpos, uint64_t *endPos){
+int32_t fetchWords(char wordBuffer[WORDS_PER_CHUNK][MAX_WORD_LEN], File32 *bookFile, uint64_t startpos, uint64_t *endPos){
   if(bookFile){
     if(!bookFile->seekSet(startpos)){
       return false; // seek failed (e.g. startpos past EOF)

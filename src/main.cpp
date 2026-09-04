@@ -32,7 +32,7 @@ volatile bool upBtnPressed = false;
 volatile bool downBtnPressed = false;
 
 SdFat sd;
-File bookFile;
+File32 bookFile;
 
 TFT_eSPI tft = TFT_eSPI();
 
@@ -125,7 +125,7 @@ void setup() {
 }
 
 void loop() {
-  drawMenu(&tft, &btnStates, sd, bookFile);
+  drawMenu(&tft, &btnStates, sd, bookFile, sdSdioConfig);
 
   tft.loadFont(AA_FONT_SMALL);
   tft.setTextColor(TFT_WHITE, TFT_BLACK);
