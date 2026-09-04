@@ -125,7 +125,7 @@ bool libraryMenu(TFT_eSPI *tft, btnSelection *btnStates, uint8_t currentMenuStat
             //Draw
             tft->drawString(String(counter) + ": " + fileName, 23, 12);
 
-            if(btnStates->selectState > 0) {
+            if(btnStates->selectState == 1) {
                 bookFile = sd.open("rvsp/" + String(fileName), FILE_READ);
                 return true; // Exit the library menu and indicate a file has been selected
             }
@@ -154,4 +154,8 @@ void drawMenu(TFT_eSPI *tft, btnSelection *btnStates, SdFat &sd, FsFile &bookFil
     }//while
 
     tft->fillScreen(0x0);
+    btnStates->selectState = 0; //Reset Select state
+    btnStates->upState = 0; //Reset Up state
+    btnStates->downState = 0; //Reset Down state
+    btnStates->menuState = 0; //Reset Menu state
 }

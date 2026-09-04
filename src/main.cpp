@@ -60,7 +60,7 @@ void rightBtnISR(){
 
 void selectBtnISR(){
   unsigned long currentTime = millis();
-  if (currentTime - lastInterruptTime >= debounceDelay) {
+  if (currentTime - lastInterruptTime >= debounceDelay*3) {
     selectBtnPressed = !selectBtnPressed; // toggle button state
     lastInterruptTime = currentTime;
     btnStates.selectState = 1; // Toggle select state
@@ -132,7 +132,8 @@ void loop() {
   tft.setTextDatum(MC_DATUM);
   
   drawRVSPWord("Start", HALF_WIDTH, HALF_HEIGHT, &tft);
-
+  readCount = fetchWords(wordBuffer, &bookFile, endPos, &endPos);
+  
   while(readCount > 0){
     uint8_t counter = 0;
 
