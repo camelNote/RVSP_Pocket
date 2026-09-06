@@ -18,12 +18,6 @@ void msc_flush_cb(void) {
   g_sd->card()->syncDevice(); 
 }
 
-static inline void pumpUSB() {
-    #if defined(ARDUINO_ARCH_STM32)
-        TinyUSB_Device_Task();
-    #endif
-}
-
 void setupUSB(SdFat &sd, SdSpiConfig &sdSdioConfig){
     g_sd = &sd; // Assign the global SdFat instance for USB MSC callbacks
 

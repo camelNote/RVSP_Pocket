@@ -109,7 +109,9 @@ void mainMenu(TFT_eSPI *tft, btnSelection *btnStates, uint8_t currentMenuState) 
 
 bool libraryMenu(TFT_eSPI *tft, btnSelection *btnStates, uint8_t currentMenuState, SdFat &sd, File32 &bookFile) {
     btnStates->selectState = 0; //Reset Select state
+    btnStates->upDownCounter = 0;
     delay(500);
+
     const uint32_t totalFiles = totalFilesInFolder(sd, "rvsp");
     
     uint32_t counter = 0;
@@ -120,7 +122,7 @@ bool libraryMenu(TFT_eSPI *tft, btnSelection *btnStates, uint8_t currentMenuStat
         char fileName[32];
 
         while(currentCounter == counter){
-            counter = (btnStates->upState > btnStates->downState) ? (btnStates->upState - btnStates->downState) % totalFiles : 0;
+            counter = btnStates->upDownCounter % totalFiles;
             getFileNameAtIndex(sd, "rvsp", fileName, counter); // Fetch the file name at the current index
 
             //Draw
@@ -138,6 +140,10 @@ bool libraryMenu(TFT_eSPI *tft, btnSelection *btnStates, uint8_t currentMenuStat
             }//if
         }//while
     }//while
+
+    btnStates->menuState = 0;
+    btnStates->selectState = 0;
+    btnStates->upDownCounter = 0;
 }
 
 void fileSysMenu(TFT_eSPI *tft, btnSelection *btnStates, SdFat &sd, SdSpiConfig &sdSdioConfig) {
@@ -151,16 +157,112 @@ void fileSysMenu(TFT_eSPI *tft, btnSelection *btnStates, SdFat &sd, SdSpiConfig 
             TinyUSB_Device_Task();   // pumps the USB state machine — needed on this core
         #endif
     }
+
+    btnStates->menuState = 0;
+    btnStates->selectState = 0;
+    btnStates->upDownCounter = 0;
 }
 
-void drawMenu(TFT_eSPI *tft, btnSelection *btnStates, SdFat &sd, File32 &bookFile, SdSpiConfig &sdSdioConfig) {
+void drawSettings(TFT_eSPI *tft, bool wpmScreen){
+    tft->fillScreen(0x0);
+    tft->unloadFont();
+    tft->setTextFont(1);
+    
+    if(wpmScreen){
+        // rect 1
+        tft->fillRect(3, 6, 277, 21, 0xFFFF);
+        // string 2
+        tft->setTextColor(0x0);
+        tft->setTextSize(1);
+        tft->setFreeFont(&FreeMono9pt7b);
+        tft->drawString("Words-Per-Minute: ", 10, 9);
+        // string 2 copy 1
+        tft->setTextColor(0xFFFF);
+        tft->setFreeFont(&FreeMono9pt7b);
+        tft->drawString("Brightness:", 9, 38);
+    }
+    else{
+        // rect 1
+        tft->fillRect(3, 36, 277, 21, 0xFFFF);
+        // string 2
+        tft->setTextColor(0xFFFF);
+        tft->setTextSize(1);
+        tft->setFreeFont(&FreeMono9pt7b);
+        tft->drawString("Words-Per-Minute: ", 10, 9);
+        // string 2 copy 1
+        tft->setTextColor(0x0);
+        tft->setFreeFont(&FreeMono9pt7b);
+        tft->drawString("Brightness:", 9, 38);
+    }
+}//drawSettings
+
+void settingMenu(TFT_eSPI *tft, btnSelection *btnStates, uint8_t currentMenuState, uint16_t &wordSpeed, uint16_t &brightness){
+    bool selectScreen = true;
+    uint16_t oldWS = wordSpeed;
+
+    btnStates->upDownCounter = 0;
+    btnStates->selectState = 0;
+
+    while(btnStates->selectState == 0){
+        uint32_t curInc = btnStates->upDownCounter;
+        drawSettings(tft, selectScreen);
+
+        if(selectScreen){
+            tft->setTextColor(0x0);
+            tft->drawString(String(wordSpeed), 205, 12);
+            tft->setTextColor(0xFFFF);
+            tft->drawString(String(brightness), 205, 38);
+        }
+        else{
+            tft->setTextColor(0xFFFF);
+            tft->drawString(String(wordSpeed), 205, 12);
+            tft->setTextColor(0x0);
+            tft->drawString(String(brightness), 205, 38);
+        }
+        
+        while(curInc == btnStates->upDownCounter && btnStates->selectState == 0 && currentMenuState == btnStates->menuState){
+            delay(50);//Delay for timing, otherwise loop runs too fast
+
+            if(selectScreen){
+                wordSpeed = oldWS + (10*btnStates->upDownCounter % 700);
+            }
+            else{
+                brightness = 80 + (btnStates->upDownCounter % 21);
+            }
+        }//while
+
+        //Change menu item in settings
+        if(btnStates->selectState == 1){
+            btnStates->selectState = 0;
+            selectScreen = !selectScreen;
+        }
+
+        if(currentMenuState != btnStates->menuState){
+            break;
+        }
+    }//while
+
+    btnStates->menuState = 0;
+    btnStates->selectState = 0;
+    btnStates->upDownCounter = 0;
+}
+
+void drawMenu(TFT_eSPI *tft, btnSelection *btnStates, SdFat &sd, File32 &bookFile, SdSpiConfig &sdSdioConfig, uint16_t &wordSpeed, uint16_t &brightness) {
     bool bookSelected = false;
+
+    tft->setTextDatum(TL_DATUM);
+    tft->unloadFont();
+    tft->setTextColor(TFT_WHITE, TFT_BLACK);
+
     //Setup
     while (!bookSelected) {
         uint8_t currentMenuState = btnStates->menuState;
 
         if(btnStates->selectState == 1 && currentMenuState == 0){
             bookSelected = libraryMenu(tft, btnStates, currentMenuState, sd, bookFile);
+        }
+        else if(btnStates->selectState == 1 && currentMenuState == 1){
+            settingMenu(tft, btnStates, currentMenuState, wordSpeed, brightness);
         }
         else if(btnStates->selectState == 1 && currentMenuState == 3){
             fileSysMenu(tft, btnStates, sd, sdSdioConfig);
@@ -172,7 +274,6 @@ void drawMenu(TFT_eSPI *tft, btnSelection *btnStates, SdFat &sd, File32 &bookFil
 
     tft->fillScreen(0x0);
     btnStates->selectState = 0; //Reset Select state
-    btnStates->upState = 0; //Reset Up state
-    btnStates->downState = 0; //Reset Down state
+    btnStates->upDownCounter = 0;
     btnStates->menuState = 0; //Reset Menu state
 }
