@@ -138,6 +138,9 @@ void loop() {
 
   rightBtnPressed = false;
   selectBtnPressed =  false;
+
+  tft.drawLine(143, 0, 143, 14, 0xFFFF);
+  tft.drawLine(143, 61, 143, 75, 0xFFFF);
   
   while(readCount > 0){
     uint8_t counter = 0;
@@ -145,9 +148,11 @@ void loop() {
     while(counter < WORDS_PER_CHUNK){
       if(selectBtnPressed){
         rightBtnPressed = false;
+        selectBtnPressed = false;
 
         //Pause
         while(!rightBtnPressed){
+          if(selectBtnPressed) break;
           delay(200);
         }
         break;
@@ -173,16 +178,20 @@ void loop() {
     readCount = fetchWords(wordBuffer, &bookFile, endPos, &endPos);
 
   }//while
+
+  //End of book reached
+  if(readCount == 0){
+    bookFile.seek(0);
+    endPos = 0;
+    readCount = fetchWords(wordBuffer, &bookFile, 0, &endPos);
+    drawRVSPWord("End of book", HALF_WIDTH, HALF_HEIGHT, &tft);
+    delay(1000);
+  }
   
-  //Read through the entire file is complete. Reset to beginning of file and start over.
-  bookFile.seek(0);
-  endPos = 0;
+  
   rightBtnPressed = false;
   selectBtnPressed =  false;
-  readCount = fetchWords(wordBuffer, &bookFile, 0, &endPos);
-  drawRVSPWord("End of book", HALF_WIDTH, HALF_HEIGHT, &tft);
-  delay(1000);
-  drawRVSPWord("Return to Menu", HALF_WIDTH, HALF_HEIGHT, &tft);
+  drawRVSPWord("Returning to Menu", HALF_WIDTH, HALF_HEIGHT, &tft);
   delay(1000);
   btnStates = {0,0,0};
 }
